@@ -1,13 +1,5 @@
-# Ingenieria del Software II - Template
+# Korven - Bar and Restaurant Management System
 
-![GHA Status](https://github.com/uca-argentina/project-template/actions/workflows/GHA.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/uca-argentina/project-template/badge.svg?branch=master)](https://coveralls.io/github/uca-argentina/project-template?branch=master)
-
-## Metacello
-
-```smalltalk
-Metacello new
-   baseline: 'IngSoft2';
-   githubUser: 'uca-argentina' project: 'project-template' commitish: 'master' path: 'repository';
-   load: 'development'.
-```
+![CI Status](https://github.com/uca-pid/2025-nempeth-back/actions/workflows/GHA.yml/badge.svg)
+[![Build Status](https://travis-ci.org/uca-pid/2025-nempeth-back.svg?branch=master)](https://travis-ci.org/uca-pid/2025-nempeth-back)
+[![Coverage Status](https://coveralls.io/repos/github/uca-pid/2025-nempeth-back/badge.svg?branch=master)](https://coveralls.io/github/uca-pid/2025-nempeth-back?branch=master)
