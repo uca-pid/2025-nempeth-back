@@ -24,9 +24,3 @@ matrix:
   allow_failures:
     - jdk: openjdk17
   fast_finish: true
-
-branches:
-  only:
-    - master
-    - main
-    - develop
