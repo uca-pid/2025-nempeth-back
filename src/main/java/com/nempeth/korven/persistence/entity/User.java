@@ -20,7 +20,7 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "email", nullable = false, unique = true, columnDefinition = "citext")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "name")
