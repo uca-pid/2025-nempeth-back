@@ -31,8 +31,8 @@ class AuthControllerTest {
     void register_owner_shouldCreateUserAndReturnId() throws Exception {
         var req = new RegisterRequest(
                 "owner@test.com",
-                "Lucas",
-                "Heredia",
+                "OwnerName",
+                "OwnerLastname",
                 "123456",
                 Role.OWNER
         );
@@ -46,7 +46,6 @@ class AuthControllerTest {
 
     @Test
     void login_withCorrectCredentials_shouldReturnToken() throws Exception {
-        // Pre: registrar usuario
         var reg = new RegisterRequest("login@test.com", "User", "Test", "123456", Role.OWNER);
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
