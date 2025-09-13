@@ -1,6 +1,5 @@
 package com.nempeth.korven.rest;
 
-import com.nempeth.korven.constants.Role;
 import com.nempeth.korven.rest.dto.LoginRequest;
 import com.nempeth.korven.rest.dto.RegisterRequest;
 import com.nempeth.korven.service.AuthService;
