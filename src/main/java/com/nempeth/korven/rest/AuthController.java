@@ -26,12 +26,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        UUID id = authService.login(req);
-        Role role = authService.getRole(id);
+        String token = authService.loginAndIssueToken(req);
         return ResponseEntity.ok(Map.of(
-                "userId", id.toString(),
-                "role", role.name(),
+                "token", token,
                 "message", "Login exitoso"
         ));
     }
+
 }

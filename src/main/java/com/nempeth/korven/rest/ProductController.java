@@ -5,6 +5,7 @@ import com.nempeth.korven.rest.dto.ProductUpsertRequest;
 import com.nempeth.korven.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,18 +19,20 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // Nota: ownerId se pasa por query param por simplicidad. En un futuro cambiar a JWT.
+    @PreAuthorize("hasRole('OWNER')")
     @PostMapping
     public ResponseEntity<?> create(@RequestParam UUID ownerId, @RequestBody ProductUpsertRequest req) {
         UUID id = productService.create(ownerId, req);
         return ResponseEntity.ok(Map.of("productId", id.toString()));
     }
 
+    @PreAuthorize("hasRole('OWNER')")
     @GetMapping
     public ResponseEntity<List<ProductResponse>> list(@RequestParam UUID ownerId) {
         return ResponseEntity.ok(productService.listByOwner(ownerId));
     }
 
+    @PreAuthorize("hasRole('OWNER')")
     @PutMapping("/{productId}")
     public ResponseEntity<?> update(@RequestParam UUID ownerId,
                                     @PathVariable UUID productId,
@@ -38,6 +41,7 @@ public class ProductController {
         return ResponseEntity.ok(Map.of("message", "Producto actualizado"));
     }
 
+    @PreAuthorize("hasRole('OWNER')")
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> delete(@RequestParam UUID ownerId, @PathVariable UUID productId) {
         productService.delete(ownerId, productId);
