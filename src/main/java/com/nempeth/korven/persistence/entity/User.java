@@ -32,9 +32,6 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "password_salt", nullable = false)
-    private String passwordSalt;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, columnDefinition = "text")
     private Role role;

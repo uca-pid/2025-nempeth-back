@@ -14,7 +14,6 @@
         <sql>CREATE EXTENSION IF NOT EXISTS citext;</sql>
     </changeSet>
 
-    <!-- USERS -->
     <changeSet id="1.0-users" author="korven">
         <createTable tableName="users">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
@@ -26,9 +25,6 @@
             <column name="name" type="TEXT"/>
             <column name="last_name" type="TEXT"/>
             <column name="password_hash" type="TEXT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="password_salt" type="TEXT">
                 <constraints nullable="false"/>
             </column>
             <column name="role" type="TEXT">
@@ -59,11 +55,6 @@
                 referencedTableName="users" referencedColumnNames="id"
                 constraintName="fk_products_owner"
                 onDelete="CASCADE"/>
-
-        <!-- Evitar duplicar nombres de producto por dueño -->
-        <addUniqueConstraint tableName="products"
-                             columnNames="owner_id, name"
-                             constraintName="uq_products_owner_name"/>
     </changeSet>
 
 </databaseChangeLog>
