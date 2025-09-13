@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-enable-extensions" author="korven">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sql>CREATE EXTENSION IF NOT EXISTS pgcrypto;</sql>
+        <sql>CREATE EXTENSION IF NOT EXISTS citext;</sql>
+    </changeSet>
+
+    <!-- USERS -->
+    <changeSet id="1.0-users" author="korven">
+        <createTable tableName="users">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="CITEXT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="TEXT"/>
+            <column name="last_name" type="TEXT"/>
+            <column name="password_hash" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_salt" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0-products" author="korven">
+        <createTable tableName="products">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="price" type="NUMERIC(12,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="products" baseColumnNames="owner_id"
+                referencedTableName="users" referencedColumnNames="id"
+                constraintName="fk_products_owner"
+                onDelete="CASCADE"/>
+
+        <!-- Evitar duplicar nombres de producto por dueño -->
+        <addUniqueConstraint tableName="products"
+                             columnNames="owner_id, name"
+                             constraintName="uq_products_owner_name"/>
+    </changeSet>
+
+</databaseChangeLog>
