@@ -63,7 +63,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_withWrongPassword_shouldReturn400() throws Exception {
+    void login_withWrongPassword_shouldReturn401() throws Exception {
         var reg = new RegisterRequest("badpass@test.com", "User", "Test", "correct-pass", Role.USER);
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error", containsString("Credenciales inválidas")));
     }
 

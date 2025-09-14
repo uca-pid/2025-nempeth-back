@@ -1,6 +1,7 @@
 package com.nempeth.korven.service;
 
 import com.nempeth.korven.constants.Role;
+import com.nempeth.korven.exception.AuthenticationException;
 import com.nempeth.korven.persistence.entity.User;
 import com.nempeth.korven.persistence.repository.UserRepository;
 import com.nempeth.korven.rest.dto.LoginRequest;
@@ -45,9 +46,9 @@ public class AuthService {
     @Transactional(readOnly = true)
     public String loginAndIssueToken(LoginRequest req) {
         User user = userRepository.findByEmailIgnoreCase(req.email())
-                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
+                .orElseThrow(() -> new AuthenticationException("Credenciales inválidas"));
         if (!PasswordUtils.matches(req.password(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Credenciales inválidas");
+            throw new AuthenticationException("Credenciales inválidas");
         }
         Map<String, Object> claims = Map.of(
                 "userId", user.getId().toString(),
