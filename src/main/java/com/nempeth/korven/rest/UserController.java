@@ -1,6 +1,8 @@
 package com.nempeth.korven.rest;
 
+import com.nempeth.korven.persistence.entity.User;
 import com.nempeth.korven.rest.dto.UpdateUserRequest;
+import com.nempeth.korven.rest.dto.UserResponse;
 import com.nempeth.korven.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,21 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication auth) {
+        String userEmail = auth.getName();
+        User user = userService.getUserByEmail(userEmail);
+        
+        UserResponse userResponse = new UserResponse(
+                user.getEmail(),
+                user.getName(),
+                user.getLastName(),
+                user.getRole()
+        );
+        
+        return ResponseEntity.ok(userResponse);
+    }
 
     @PutMapping("/{userId}")
     public ResponseEntity<?> update(@PathVariable UUID userId,

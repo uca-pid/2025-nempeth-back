@@ -66,4 +66,10 @@ public class UserService {
         }
         userRepository.delete(target);
     }
+
+    @Transactional
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
 }
