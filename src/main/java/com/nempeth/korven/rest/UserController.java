@@ -1,7 +1,8 @@
 package com.nempeth.korven.rest;
 
 import com.nempeth.korven.persistence.entity.User;
-import com.nempeth.korven.rest.dto.UpdateUserRequest;
+import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
+import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
 import com.nempeth.korven.rest.dto.UserResponse;
 import com.nempeth.korven.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +35,13 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<?> update(@PathVariable UUID userId,
-                                    @RequestBody UpdateUserRequest req,
-                                    Authentication auth) {
-        String requesterEmail = auth.getName();
-        boolean emailChanged = userService.updateUser(userId, requesterEmail, req);
 
+    @PutMapping("/{userId}/profile")
+    public ResponseEntity<?> updateProfile(@PathVariable UUID userId,
+                                           @RequestBody UpdateUserProfileRequest req,
+                                           Authentication auth) {
+        String requesterEmail = auth.getName();
+        boolean emailChanged = userService.updateUserProfile(userId, requesterEmail, req);
         if (emailChanged) {
             return ResponseEntity.ok(Map.of(
                     "message", "Usuario actualizado. Reingresá con el nuevo email para obtener un nuevo token.",
@@ -48,6 +49,15 @@ public class UserController {
             ));
         }
         return ResponseEntity.ok(Map.of("message", "Usuario actualizado", "emailChanged", false));
+    }
+
+    @PutMapping("/{userId}/password")
+    public ResponseEntity<?> updatePassword(@PathVariable UUID userId,
+                                            @RequestBody UpdateUserPasswordRequest req,
+                                            Authentication auth) {
+        String requesterEmail = auth.getName();
+        userService.updateUserPassword(userId, requesterEmail, req);
+        return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
     }
 
     @DeleteMapping("/{userId}")

@@ -3,6 +3,8 @@ package com.nempeth.korven.rest;
 import com.nempeth.korven.constants.Role;
 import com.nempeth.korven.rest.dto.LoginRequest;
 import com.nempeth.korven.rest.dto.RegisterRequest;
+import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
+import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ class UserControllerTest {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     @Test
     void getCurrentUser_shouldReturnUserData() throws Exception {
         // Arrange
@@ -54,5 +59,41 @@ class UserControllerTest {
         // Act & Assert
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateUserProfile_shouldUpdateProfileFields() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("profile@test.com", "Ana", "Perez", "password123", Role.USER);
+        UUID userId = authService.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("profile@test.com", "password123");
+        String token = authService.loginAndIssueToken(loginRequest);
+
+        UpdateUserProfileRequest updateReq = new UpdateUserProfileRequest("profile2@test.com", "Anita", "Pereira");
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + userId + "/profile")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq))
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.emailChanged").value(true));
+    }
+
+    @Test
+    void updateUserPassword_shouldUpdatePassword() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("pass@test.com", "Pablo", "Gomez", "password123", Role.USER);
+        UUID userId = authService.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("pass@test.com", "password123");
+        String token = authService.loginAndIssueToken(loginRequest);
+
+        UpdateUserPasswordRequest updateReq = new UpdateUserPasswordRequest("newpass456");
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + userId + "/password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq))
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Contraseña actualizada"));
     }
 }
