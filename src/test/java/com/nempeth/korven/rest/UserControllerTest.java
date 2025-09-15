@@ -86,7 +86,7 @@ class UserControllerTest {
         LoginRequest loginRequest = new LoginRequest("pass@test.com", "password123");
         String token = authService.loginAndIssueToken(loginRequest);
 
-        UpdateUserPasswordRequest updateReq = new UpdateUserPasswordRequest("newpass456");
+        UpdateUserPasswordRequest updateReq = new UpdateUserPasswordRequest("password123", "newpass456");
         mockMvc.perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + userId + "/password")
                         .header("Authorization", "Bearer " + token)
