@@ -42,7 +42,7 @@ public class EmailService {
         } catch (Exception e) {
             log.error("No se pudo enviar el email de reset a {}", to, e);
             // En ambientes sin SMTP, al menos logueamos el link
-            log.info("LINK DE RESET PARA {} -> {}", to, resetLink);
+            log.info("LINK RESET PARA {} -> {}", to, resetLink);
         }
     }
 }
