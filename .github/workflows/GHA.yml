@@ -37,7 +37,7 @@ jobs:
           DB_URL: jdbc:h2:mem:testdb
           DB_USERNAME: sa
           DB_PASSWORD: 
-          JWT_SECRET: test-secret-for-ci
+          JWT_SECRET: test-secret-for-ci-pipeline-256-bits-minimum-length-required-for-jwt
           SPRING_PROFILES_ACTIVE: test
         
       - name: Generate test report
@@ -76,7 +76,7 @@ jobs:
           DB_URL: jdbc:h2:mem:testdb
           DB_USERNAME: sa
           DB_PASSWORD: 
-          JWT_SECRET: test-secret-for-ci
+          JWT_SECRET: test-secret-for-ci-pipeline-256-bits-minimum-length-required-for-jwt
         
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -111,4 +111,4 @@ jobs:
           DB_URL: jdbc:h2:mem:testdb
           DB_USERNAME: sa
           DB_PASSWORD: 
-          JWT_SECRET: test-secret-for-ci
+          JWT_SECRET: test-secret-for-ci-pipeline-256-bits-minimum-length-required-for-jwt
