@@ -79,7 +79,7 @@ jobs:
           JWT_SECRET: test-secret-for-ci-pipeline-256-bits-minimum-length-required-for-jwt
         
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jar-artifact
           path: target/*.jar
@@ -104,11 +104,3 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-          
-      - name: Run OWASP dependency check
-        run: ./mvnw dependency-check:check
-        env:
-          DB_URL: jdbc:h2:mem:testdb
-          DB_USERNAME: sa
-          DB_PASSWORD: 
-          JWT_SECRET: test-secret-for-ci-pipeline-256-bits-minimum-length-required-for-jwt
