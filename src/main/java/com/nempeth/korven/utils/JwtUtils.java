@@ -38,8 +38,4 @@ public class JwtUtils {
     public Jws<Claims> parseToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
     }
-
-    public String getSubject(String token) {
-        return parseToken(token).getBody().getSubject();
-    }
 }
