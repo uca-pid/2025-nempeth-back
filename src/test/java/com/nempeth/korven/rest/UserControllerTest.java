@@ -99,4 +99,74 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Contraseña actualizada"));
     }
+
+    @Test
+    void updateUserProfile_withSameEmail_shouldNotChangeEmail() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("same@test.com", "Same", "User", "password123", Role.USER);
+        UUID userId = authService.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("same@test.com", "password123");
+        String token = authService.loginAndIssueToken(loginRequest);
+
+        UpdateUserProfileRequest updateReq = new UpdateUserProfileRequest("same@test.com", "Updated", "Name");
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + userId + "/profile")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq))
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.emailChanged").value(false))
+                .andExpect(jsonPath("$.message").value("Usuario actualizado"));
+    }
+
+    @Test
+    void updateUserProfile_withoutAuth_shouldReturn403() throws Exception {
+        UUID randomUserId = UUID.randomUUID();
+        UpdateUserProfileRequest updateReq = new UpdateUserProfileRequest("new@test.com", "New", "User");
+        
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + randomUserId + "/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq))
+        )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateUserPassword_withoutAuth_shouldReturn403() throws Exception {
+        UUID randomUserId = UUID.randomUUID();
+        UpdateUserPasswordRequest updateReq = new UpdateUserPasswordRequest("oldpass", "newpass");
+        
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/users/" + randomUserId + "/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq))
+        )
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteUser_shouldDeleteUser() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("delete@test.com", "Delete", "User", "password123", Role.USER);
+        UUID userId = authService.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("delete@test.com", "password123");
+        String token = authService.loginAndIssueToken(loginRequest);
+
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/users/" + userId)
+                        .header("Authorization", "Bearer " + token)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Usuario eliminado"));
+    }
+
+    @Test
+    void deleteUser_withoutAuth_shouldReturn403() throws Exception {
+        UUID randomUserId = UUID.randomUUID();
+        
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/users/" + randomUserId)
+        )
+                .andExpect(status().isForbidden());
+    }
 }
