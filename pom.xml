@@ -183,6 +183,12 @@
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>4.3.0</version>
+				<configuration>
+					<jacocoReportPath>${project.reporting.outputDirectory}/jacoco/jacoco.xml</jacocoReportPath>
+					<sourceDirectories>
+					<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+					</sourceDirectories>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
