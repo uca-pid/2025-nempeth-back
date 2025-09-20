@@ -302,4 +302,22 @@ class ProductRepositoryTest {
         assertTrue(allProducts.stream().anyMatch(p -> "Product A".equals(p.getName())));
         assertTrue(allProducts.stream().anyMatch(p -> "Product B".equals(p.getName())));
     }
+
+    @Test
+    void shouldNotOverrideExistingIdInPrePersist() {
+        // This test covers the branch where id != null in the @PrePersist method
+        UUID predefinedId = UUID.randomUUID();
+        Product productWithPredefinedId = Product.builder()
+                .id(predefinedId)  // Setting ID explicitly
+                .owner(owner1)
+                .name("Product with Predefined ID")
+                .price(new BigDecimal("25.99"))
+                .build();
+        
+        Product savedProduct = productRepository.save(productWithPredefinedId);
+        
+        // The ID should remain the same as the predefined one
+        assertEquals(predefinedId, savedProduct.getId());
+        assertEquals("Product with Predefined ID", savedProduct.getName());
+    }
 }

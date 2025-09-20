@@ -192,4 +192,24 @@ class UserRepositoryTest {
             userRepository.flush();
         });
     }
+
+    @Test
+    void shouldNotOverrideExistingIdInPrePersist() {
+        // This test covers the branch where id != null in the @PrePersist method
+        UUID predefinedId = UUID.randomUUID();
+        User userWithPredefinedId = User.builder()
+                .id(predefinedId)  // Setting ID explicitly
+                .email("predefined@example.com")
+                .name("Predefined")
+                .lastName("User")
+                .passwordHash("hash123")
+                .role(Role.USER)
+                .build();
+        
+        User savedUser = userRepository.save(userWithPredefinedId);
+        
+        // The ID should remain the same as the predefined one
+        assertEquals(predefinedId, savedUser.getId());
+        assertEquals("predefined@example.com", savedUser.getEmail());
+    }
 }
