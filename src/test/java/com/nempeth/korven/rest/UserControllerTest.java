@@ -59,7 +59,7 @@ class UserControllerTest {
 
     @Test
     void getCurrentUser_withoutToken_shouldReturn403() throws Exception {
-        // Act & Assert
+        // Act & 
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isForbidden());
     }
