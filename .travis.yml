@@ -1,15 +1,28 @@
-language: smalltalk
+language: java
 sudo: false
 os:
   - linux
-smalltalk:
-  - Pharo32-8.0
-  - Pharo64-8.0
-  - Pharo-7.0
-  - Pharo64-7.0
-  - Pharo64-stable
-  - Pharo64-alpha
+jdk:
+  - openjdk21
+  - openjdk17
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_script:
+  - chmod +x mvnw
+
+script:
+  - ./mvnw -q clean verify
+
+after_success:
+  - |
+    if [ "$TRAVIS_JDK_VERSION" = "openjdk21" ]; then
+      ./mvnw -q coveralls:report -DrepoToken=$COVERALLS_REPO_TOKEN
+    fi
+
 matrix:
   allow_failures:
-  - smalltalk: Pharo64-alpha
+    - jdk: openjdk17
   fast_finish: true

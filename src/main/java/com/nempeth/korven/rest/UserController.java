@@ -1,0 +1,69 @@
+package com.nempeth.korven.rest;
+
+import com.nempeth.korven.persistence.entity.User;
+import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
+import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
+import com.nempeth.korven.rest.dto.UserResponse;
+import com.nempeth.korven.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService userService;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication auth) {
+        String userEmail = auth.getName();
+        User user = userService.getUserByEmail(userEmail);
+        
+        UserResponse userResponse = new UserResponse(
+                user.getEmail(),
+                user.getName(),
+                user.getLastName(),
+                user.getRole()
+        );
+        
+        return ResponseEntity.ok(userResponse);
+    }
+
+
+    @PutMapping("/{userId}/profile")
+    public ResponseEntity<?> updateProfile(@PathVariable UUID userId,
+                                           @RequestBody UpdateUserProfileRequest req,
+                                           Authentication auth) {
+        String requesterEmail = auth.getName();
+        boolean emailChanged = userService.updateUserProfile(userId, requesterEmail, req);
+        if (emailChanged) {
+            return ResponseEntity.ok(Map.of(
+                    "message", "Usuario actualizado. Reingresá con el nuevo email para obtener un nuevo token.",
+                    "emailChanged", true
+            ));
+        }
+        return ResponseEntity.ok(Map.of("message", "Usuario actualizado", "emailChanged", false));
+    }
+
+    @PutMapping("/{userId}/password")
+    public ResponseEntity<?> updatePassword(@PathVariable UUID userId,
+                                            @RequestBody UpdateUserPasswordRequest req,
+                                            Authentication auth) {
+        String requesterEmail = auth.getName();
+        userService.updateUserPassword(userId, requesterEmail, req);
+        return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> delete(@PathVariable UUID userId, Authentication auth) {
+        String requesterEmail = auth.getName();
+        userService.deleteUser(userId, requesterEmail);
+        return ResponseEntity.ok(Map.of("message", "Usuario eliminado"));
+    }
+}
