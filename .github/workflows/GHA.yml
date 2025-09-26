@@ -126,13 +126,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Push to Heroku (git deploy)
+      - name: Validate Heroku secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Validaciones (no imprimimos los valores, solo longitud)
+          [[ -n "${HEROKU_APP_NAME:-}" ]] || { echo "::error::HEROKU_APP_NAME no está seteado"; exit 1; }
+          [[ -n "${HEROKU_API_KEY:-}"  ]] || { echo "::error::HEROKU_API_KEY no está seteado";  exit 1; }
+          [[ -n "${HEROKU_EMAIL:-}"    ]] || { echo "::error::HEROKU_EMAIL no está seteado";    exit 1; }
+          echo "HEROKU_APP_NAME length: ${#HEROKU_APP_NAME}"
+          echo "HEROKU_API_KEY length: ${#HEROKU_API_KEY}"
+
         env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+
+      - name: Configure Git remote and push to Heroku
+        shell: bash
+        env:
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "$HEROKU_EMAIL"
-          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "${HEROKU_EMAIL}"
+          git remote remove heroku || true
+          git remote add heroku "https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git"
+          git remote -v
           git push heroku HEAD:main -f
