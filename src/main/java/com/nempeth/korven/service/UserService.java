@@ -1,15 +1,21 @@
 package com.nempeth.korven.service;
 
+import com.nempeth.korven.constants.MembershipStatus;
+import com.nempeth.korven.persistence.entity.BusinessMembership;
 import com.nempeth.korven.persistence.entity.User;
+import com.nempeth.korven.persistence.repository.BusinessMembershipRepository;
 import com.nempeth.korven.persistence.repository.UserRepository;
+import com.nempeth.korven.rest.dto.BusinessMembershipResponse;
 import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
+import com.nempeth.korven.rest.dto.UserResponse;
 import com.nempeth.korven.utils.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -18,6 +24,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BusinessMembershipRepository membershipRepository;
 
     private static final Pattern EMAIL_RX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
@@ -88,9 +95,32 @@ public class UserService {
         userRepository.delete(target);
     }
 
-    @Transactional
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmailIgnoreCase(email)
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        
+        List<BusinessMembershipResponse> businesses = membershipRepository
+                .findByUserIdAndStatus(user.getId(), MembershipStatus.ACTIVE)
+                .stream()
+                .map(this::mapToMembershipResponse)
+                .toList();
+        
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .lastName(user.getLastName())
+                .businesses(businesses)
+                .build();
+    }
+
+    private BusinessMembershipResponse mapToMembershipResponse(BusinessMembership membership) {
+        return BusinessMembershipResponse.builder()
+                .businessId(membership.getBusiness().getId())
+                .businessName(membership.getBusiness().getName())
+                .role(membership.getRole())
+                .status(membership.getStatus())
+                .build();
     }
 }

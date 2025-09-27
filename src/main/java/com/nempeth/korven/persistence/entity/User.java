@@ -1,9 +1,9 @@
 package com.nempeth.korven.persistence.entity;
 
-import com.nempeth.korven.constants.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,9 +32,11 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, columnDefinition = "text")
-    private Role role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<BusinessMembership> businessMemberships;
+
+    @OneToMany(mappedBy = "createdByUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Sale> createdSales;
 
     @PrePersist
     public void prePersist() {

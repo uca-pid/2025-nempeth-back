@@ -1,6 +1,5 @@
 package com.nempeth.korven.rest;
 
-import com.nempeth.korven.persistence.entity.User;
 import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
 import com.nempeth.korven.rest.dto.UserResponse;
@@ -23,15 +22,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication auth) {
         String userEmail = auth.getName();
-        User user = userService.getUserByEmail(userEmail);
-        
-        UserResponse userResponse = new UserResponse(
-                user.getEmail(),
-                user.getName(),
-                user.getLastName(),
-                user.getRole()
-        );
-        
+        UserResponse userResponse = userService.getUserByEmail(userEmail);
         return ResponseEntity.ok(userResponse);
     }
 
