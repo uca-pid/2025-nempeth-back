@@ -199,34 +199,42 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="010-trigger-seed-static-categories" author="korven">
+    <!-- Función para crear categorías estáticas automáticamente -->
+    <changeSet id="010-create-function-seed-static-categories" author="korven">
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
         </preConditions>
-
-        <sql>
-            CREATE OR REPLACE FUNCTION seed_static_categories() RETURNS trigger AS $$
+        <sql splitStatements="false">
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION seed_static_categories() RETURNS trigger AS '
             BEGIN
-            INSERT INTO category (id,business_id,name,type)
-            VALUES
-            (gen_random_uuid(), NEW.id, 'Entrada',               'STATIC'),
-            (gen_random_uuid(), NEW.id, 'Plato principal',       'STATIC'),
-            (gen_random_uuid(), NEW.id, 'Postre',                'STATIC'),
-            (gen_random_uuid(), NEW.id, 'Bebidas con alcohol',   'STATIC'),
-            (gen_random_uuid(), NEW.id, 'Bebidas sin alcohol',   'STATIC');
-            RETURN NEW;
+                INSERT INTO category (id, business_id, name, type, display_name)
+                VALUES
+                    (gen_random_uuid(), NEW.id, ''Entrada'', ''STATIC'', ''Entrada''),
+                    (gen_random_uuid(), NEW.id, ''Plato principal'', ''STATIC'', ''Plato principal''),
+                    (gen_random_uuid(), NEW.id, ''Postre'', ''STATIC'', ''Postre''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas con alcohol'', ''STATIC'', ''Bebidas con alcohol''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas sin alcohol'', ''STATIC'', ''Bebidas sin alcohol'');
+                RETURN NEW;
             END;
-            $$ LANGUAGE plpgsql;
+            ' LANGUAGE plpgsql;
+            ]]>
         </sql>
+    </changeSet>
 
+    <!-- Trigger para crear categorías estáticas cuando se crea un negocio -->
+    <changeSet id="011-create-trigger-seed-static-categories" author="korven">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
         <sql>
             DROP TRIGGER IF EXISTS trg_seed_static_categories ON business;
         </sql>
         <sql>
             CREATE TRIGGER trg_seed_static_categories
-            AFTER INSERT ON business
-            FOR EACH ROW
-            EXECUTE FUNCTION seed_static_categories();
+                AFTER INSERT ON business
+                FOR EACH ROW
+                EXECUTE FUNCTION seed_static_categories();
         </sql>
     </changeSet>
 
