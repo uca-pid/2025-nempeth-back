@@ -50,7 +50,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:5173"));
+        cors.setAllowedOrigins(List.of("https://korven-web-c21b9b7375ff.herokuapp.com", "http://localhost:5173"));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         cors.setExposedHeaders(List.of("Authorization"));
