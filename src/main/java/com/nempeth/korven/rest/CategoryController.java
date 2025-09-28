@@ -2,6 +2,7 @@ package com.nempeth.korven.rest;
 
 import com.nempeth.korven.rest.dto.CategoryResponse;
 import com.nempeth.korven.rest.dto.CreateCategoryRequest;
+import com.nempeth.korven.rest.dto.UpdateCategoryRequest;
 import com.nempeth.korven.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,20 @@ public class CategoryController {
         
         return ResponseEntity.ok(Map.of(
                 "message", "Categoría creada exitosamente",
+                "category", category
+        ));
+    }
+
+    @PutMapping("/{categoryId}")
+    public ResponseEntity<?> updateCustomCategory(@PathVariable UUID businessId,
+                                                 @PathVariable UUID categoryId,
+                                                 @Valid @RequestBody UpdateCategoryRequest request,
+                                                 Authentication auth) {
+        String userEmail = auth.getName();
+        CategoryResponse category = categoryService.updateCustomCategory(userEmail, businessId, categoryId, request);
+        
+        return ResponseEntity.ok(Map.of(
+                "message", "Categoría actualizada exitosamente",
                 "category", category
         ));
     }

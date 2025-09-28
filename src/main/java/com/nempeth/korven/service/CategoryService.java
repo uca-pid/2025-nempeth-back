@@ -13,6 +13,7 @@ import com.nempeth.korven.persistence.repository.CategoryRepository;
 import com.nempeth.korven.persistence.repository.UserRepository;
 import com.nempeth.korven.rest.dto.CategoryResponse;
 import com.nempeth.korven.rest.dto.CreateCategoryRequest;
+import com.nempeth.korven.rest.dto.UpdateCategoryRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +88,43 @@ public class CategoryService {
         }
         
         categoryRepository.delete(category);
+    }
+
+    @Transactional
+    public CategoryResponse updateCustomCategory(String userEmail, UUID businessId, UUID categoryId, UpdateCategoryRequest request) {
+        validateUserBusinessAccess(userEmail, businessId);
+        
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
+        
+        if (!category.getBusiness().getId().equals(businessId)) {
+            throw new IllegalArgumentException("La categoría no pertenece a este negocio");
+        }
+        
+        if (category.getType() == CategoryType.STATIC) {
+            throw new IllegalArgumentException("No se puede modificar una categoría estática");
+        }
+        
+        // Check if the new name already exists for another category in the same business
+        if (request.name() != null && !request.name().equals(category.getName())) {
+            if (categoryRepository.existsByBusinessIdAndNameIgnoreCase(businessId, request.name())) {
+                throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+            }
+            category.setName(request.name());
+        }
+        
+        // Update other fields if provided
+        if (request.displayName() != null) {
+            category.setDisplayName(request.displayName());
+        }
+        
+        if (request.icon() != null) {
+            category.setIcon(request.icon());
+        }
+        
+        category = categoryRepository.save(category);
+        
+        return mapToResponse(category);
     }
 
     private void validateUserBusinessAccess(String userEmail, UUID businessId) {
