@@ -1,6 +1,7 @@
 package com.nempeth.korven.rest;
 
 import com.nempeth.korven.rest.dto.BusinessResponse;
+import com.nempeth.korven.rest.dto.BusinessDetailResponse;
 import com.nempeth.korven.rest.dto.CreateBusinessRequest;
 import com.nempeth.korven.rest.dto.JoinBusinessRequest;
 import com.nempeth.korven.service.BusinessService;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/businesses")
@@ -41,5 +43,14 @@ public class BusinessController {
                 "message", "Te has unido al negocio exitosamente",
                 "business", business
         ));
+    }
+
+    @GetMapping("/{businessId}/detail")
+    public ResponseEntity<BusinessDetailResponse> getBusinessDetail(@PathVariable UUID businessId,
+                                                                   Authentication auth) {
+        String userEmail = auth.getName();
+        BusinessDetailResponse businessDetail = businessService.getBusinessDetail(userEmail, businessId);
+        
+        return ResponseEntity.ok(businessDetail);
     }
 }
