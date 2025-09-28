@@ -148,7 +148,7 @@ public class AuthService {
                 .user(user)
                 .business(business)
                 .role(MembershipRole.EMPLOYEE)
-                .status(MembershipStatus.ACTIVE)
+                .status(MembershipStatus.PENDING)
                 .build();
 
         businessMembershipRepository.save(membership);

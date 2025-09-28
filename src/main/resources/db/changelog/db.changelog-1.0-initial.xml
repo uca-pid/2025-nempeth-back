@@ -208,13 +208,13 @@
             <![CDATA[
             CREATE OR REPLACE FUNCTION seed_static_categories() RETURNS trigger AS '
             BEGIN
-                INSERT INTO category (id, business_id, name, type, display_name)
+                INSERT INTO category (id, business_id, name, type, display_name, icon)
                 VALUES
-                    (gen_random_uuid(), NEW.id, ''Entrada'', ''STATIC'', ''Entrada''),
-                    (gen_random_uuid(), NEW.id, ''Plato principal'', ''STATIC'', ''Plato principal''),
-                    (gen_random_uuid(), NEW.id, ''Postre'', ''STATIC'', ''Postre''),
-                    (gen_random_uuid(), NEW.id, ''Bebidas con alcohol'', ''STATIC'', ''Bebidas con alcohol''),
-                    (gen_random_uuid(), NEW.id, ''Bebidas sin alcohol'', ''STATIC'', ''Bebidas sin alcohol'');
+                    (gen_random_uuid(), NEW.id, ''Entrada'', ''STATIC'', ''Entrada'', ''🍽️''),
+                    (gen_random_uuid(), NEW.id, ''Plato principal'', ''STATIC'', ''Plato principal'', ''🍲''),
+                    (gen_random_uuid(), NEW.id, ''Postre'', ''STATIC'', ''Postre'', ''🍨''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas con alcohol'', ''STATIC'', ''Bebidas con alcohol'', ''🍺''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas sin alcohol'', ''STATIC'', ''Bebidas sin alcohol'', ''🥤'');
                 RETURN NEW;
             END;
             ' LANGUAGE plpgsql;
