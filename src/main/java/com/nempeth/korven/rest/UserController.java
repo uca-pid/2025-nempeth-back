@@ -29,6 +29,13 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID userId, Authentication auth) {
+        String requesterEmail = auth.getName();
+        UserResponse userResponse = userService.getUserById(userId, requesterEmail);
+        return ResponseEntity.ok(userResponse);
+    }
+
 
     @PutMapping("/{userId}/profile")
     public ResponseEntity<?> updateProfile(@PathVariable UUID userId,

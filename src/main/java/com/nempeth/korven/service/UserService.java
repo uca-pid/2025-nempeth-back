@@ -118,6 +118,51 @@ public class UserService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(UUID userId, String requesterEmail) {
+        // Verificar que el usuario solicitante existe
+        User requester = userRepository.findByEmailIgnoreCase(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario solicitante no encontrado"));
+
+        // Obtener el usuario objetivo
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        // Verificar que el solicitante tiene acceso a ver este usuario
+        // (debe ser el mismo usuario o tener acceso a través de un negocio compartido)
+        if (!requester.getId().equals(userId)) {
+            // Verificar si comparten al menos un negocio
+            List<BusinessMembership> requesterMemberships = membershipRepository
+                    .findByUserId(requester.getId());
+            
+            List<BusinessMembership> targetMemberships = membershipRepository
+                    .findByUserId(userId);
+
+            boolean hasSharedBusiness = requesterMemberships.stream()
+                    .anyMatch(reqMembership -> targetMemberships.stream()
+                            .anyMatch(targetMembership -> 
+                                    reqMembership.getBusiness().getId().equals(targetMembership.getBusiness().getId())));
+
+            if (!hasSharedBusiness) {
+                throw new AccessDeniedException("No tienes acceso para ver los datos de este usuario");
+            }
+        }
+
+        List<BusinessMembershipResponse> businesses = membershipRepository
+                .findByUserId(targetUser.getId())
+                .stream()
+                .map(this::mapToMembershipResponse)
+                .toList();
+        
+        return UserResponse.builder()
+                .id(targetUser.getId())
+                .email(targetUser.getEmail())
+                .name(targetUser.getName())
+                .lastName(targetUser.getLastName())
+                .businesses(businesses)
+                .build();
+    }
+
     private BusinessMembershipResponse mapToMembershipResponse(BusinessMembership membership) {
         return BusinessMembershipResponse.builder()
                 .businessId(membership.getBusiness().getId())

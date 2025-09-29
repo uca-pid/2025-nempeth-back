@@ -249,4 +249,29 @@ public class BusinessService {
         
         return sb.toString();
     }
+
+    @Transactional(readOnly = true)
+    public List<BusinessMemberDetailResponse> getBusinessMembers(String userEmail, UUID businessId) {
+        // Validar acceso del usuario al negocio
+        validateUserBusinessAccess(userEmail, businessId);
+        
+        // Obtener todos los miembros del negocio (sin filtrar por status)
+        return membershipRepository.findByBusinessId(businessId)
+                .stream()
+                .map(this::mapToMemberDetailResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BusinessMemberDetailResponse> getBusinessEmployees(String userEmail, UUID businessId) {
+        // Validar acceso del usuario al negocio
+        validateUserBusinessAccess(userEmail, businessId);
+        
+        // Obtener solo los empleados del negocio (sin filtrar por status)
+        return membershipRepository.findByBusinessId(businessId)
+                .stream()
+                .filter(membership -> membership.getRole() == MembershipRole.EMPLOYEE)
+                .map(this::mapToMemberDetailResponse)
+                .toList();
+    }
 }
