@@ -1,5 +1,6 @@
 package com.nempeth.korven.rest;
 
+import com.nempeth.korven.rest.dto.UpdateMembershipRoleRequest;
 import com.nempeth.korven.rest.dto.UpdateMembershipStatusRequest;
 import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
@@ -61,6 +62,16 @@ public class UserController {
         String requesterEmail = auth.getName();
         userService.updateMembershipStatus(businessId, userId, requesterEmail, req);
         return ResponseEntity.ok(Map.of("message", "Status de membresía actualizado"));
+    }
+
+    @PutMapping("/businesses/{businessId}/members/{userId}/role")
+    public ResponseEntity<?> updateMembershipRole(@PathVariable UUID businessId,
+                                                 @PathVariable UUID userId,
+                                                 @Valid @RequestBody UpdateMembershipRoleRequest req,
+                                                 Authentication auth) {
+        String requesterEmail = auth.getName();
+        userService.updateMembershipRole(businessId, userId, requesterEmail, req);
+        return ResponseEntity.ok(Map.of("message", "Role de membresía actualizado"));
     }
 
     @DeleteMapping("/{userId}")

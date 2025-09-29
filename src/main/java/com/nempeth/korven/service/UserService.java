@@ -7,6 +7,7 @@ import com.nempeth.korven.persistence.entity.User;
 import com.nempeth.korven.persistence.repository.BusinessMembershipRepository;
 import com.nempeth.korven.persistence.repository.UserRepository;
 import com.nempeth.korven.rest.dto.BusinessMembershipResponse;
+import com.nempeth.korven.rest.dto.UpdateMembershipRoleRequest;
 import com.nempeth.korven.rest.dto.UpdateMembershipStatusRequest;
 import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
@@ -155,6 +156,47 @@ public class UserService {
 
         // Actualizar el status
         targetMembership.setStatus(req.status());
+        membershipRepository.save(targetMembership);
+    }
+
+    @Transactional
+    public void updateMembershipRole(UUID businessId, UUID userId, String requesterEmail, UpdateMembershipRoleRequest req) {
+        // Verificar que el usuario solicitante tiene acceso al negocio y permisos
+        User requester = userRepository.findByEmailIgnoreCase(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario solicitante no encontrado"));
+
+        BusinessMembership requesterMembership = membershipRepository.findByBusinessIdAndUserId(businessId, requester.getId())
+                .orElseThrow(() -> new IllegalArgumentException("No tienes acceso a este negocio"));
+
+        // Solo permitir que propietarios actualicen el role de membresía
+        if (requesterMembership.getRole() != MembershipRole.OWNER) {
+            throw new AccessDeniedException("Solo los propietarios pueden actualizar el role de membresía");
+        }
+
+        if (requesterMembership.getStatus() != MembershipStatus.ACTIVE) {
+            throw new IllegalArgumentException("Tu membresía en este negocio no está activa");
+        }
+
+        // Encontrar la membresía del usuario objetivo
+        BusinessMembership targetMembership = membershipRepository.findByBusinessIdAndUserId(businessId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no es miembro de este negocio"));
+
+        // No permitir que el propietario cambie su propio role
+        if (requester.getId().equals(userId)) {
+            throw new IllegalArgumentException("No puedes cambiar tu propio role de membresía");
+        }
+
+        // Validar que solo se pueda cambiar de EMPLOYEE a OWNER
+        if (targetMembership.getRole() != MembershipRole.EMPLOYEE) {
+            throw new IllegalArgumentException("Solo se puede promocionar empleados a propietarios");
+        }
+
+        if (req.role() != MembershipRole.OWNER) {
+            throw new IllegalArgumentException("Solo se puede promocionar a propietario (OWNER)");
+        }
+
+        // Actualizar el role
+        targetMembership.setRole(req.role());
         membershipRepository.save(targetMembership);
     }
 }
