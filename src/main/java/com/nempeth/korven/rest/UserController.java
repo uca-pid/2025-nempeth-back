@@ -1,9 +1,11 @@
 package com.nempeth.korven.rest;
 
+import com.nempeth.korven.rest.dto.UpdateMembershipStatusRequest;
 import com.nempeth.korven.rest.dto.UpdateUserProfileRequest;
 import com.nempeth.korven.rest.dto.UpdateUserPasswordRequest;
 import com.nempeth.korven.rest.dto.UserResponse;
 import com.nempeth.korven.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -49,6 +51,16 @@ public class UserController {
         String requesterEmail = auth.getName();
         userService.updateUserPassword(userId, requesterEmail, req);
         return ResponseEntity.ok(Map.of("message", "Contraseña actualizada"));
+    }
+
+    @PutMapping("/businesses/{businessId}/members/{userId}/status")
+    public ResponseEntity<?> updateMembershipStatus(@PathVariable UUID businessId,
+                                                   @PathVariable UUID userId,
+                                                   @Valid @RequestBody UpdateMembershipStatusRequest req,
+                                                   Authentication auth) {
+        String requesterEmail = auth.getName();
+        userService.updateMembershipStatus(businessId, userId, requesterEmail, req);
+        return ResponseEntity.ok(Map.of("message", "Status de membresía actualizado"));
     }
 
     @DeleteMapping("/{userId}")
