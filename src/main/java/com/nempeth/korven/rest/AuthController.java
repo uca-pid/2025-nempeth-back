@@ -12,6 +12,7 @@ import com.nempeth.korven.service.PasswordResetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -57,7 +59,10 @@ public class AuthController {
     @PostMapping("/password/forgot")
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req,
                                                HttpServletRequest http) {
+        log.info("Received forgot password request for email: {}", req.email());
+        log.info("Request Origin: {}", http.getHeader("Origin"));
         passwordResetService.startReset(req.email(), http);
+        log.info("Password reset process initiated successfully");
         // Siempre 200 para no revelar si el mail existe
         return ResponseEntity.ok().build();
     }

@@ -28,6 +28,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
+        // Skip JWT validation for password reset endpoints
+        String path = request.getRequestURI();
+        if (path.startsWith("/auth/password/") || "OPTIONS".equals(request.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
