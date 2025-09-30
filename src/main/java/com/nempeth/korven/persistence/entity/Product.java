@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "products",
-        uniqueConstraints = @UniqueConstraint(name = "uq_products_owner_name", columnNames = {"owner_id","name"}))
+@Table(name = "products")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,9 +20,14 @@ public class Product {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_products_owner"))
-    private User owner;
+    @JoinColumn(name = "business_id", nullable = false,
+                foreignKey = @ForeignKey(name = "fk_products_business"))
+    private Business business;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false,
+                foreignKey = @ForeignKey(name = "fk_products_category"))
+    private Category category;
 
     @Column(name = "name", nullable = false, columnDefinition = "text")
     private String name;
@@ -32,6 +37,9 @@ public class Product {
 
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<SaleItem> saleItems;
 
     @PrePersist
     public void prePersist() {

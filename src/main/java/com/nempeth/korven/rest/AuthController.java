@@ -2,7 +2,10 @@ package com.nempeth.korven.rest;
 
 import com.nempeth.korven.rest.dto.ForgotPasswordRequest;
 import com.nempeth.korven.rest.dto.LoginRequest;
+import com.nempeth.korven.rest.dto.RegisterEmployeeRequest;
+import com.nempeth.korven.rest.dto.RegisterOwnerRequest;
 import com.nempeth.korven.rest.dto.RegisterRequest;
+import com.nempeth.korven.rest.dto.RegistrationResponse;
 import com.nempeth.korven.rest.dto.ResetPasswordRequest;
 import com.nempeth.korven.service.AuthService;
 import com.nempeth.korven.service.PasswordResetService;
@@ -28,6 +31,18 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         UUID id = authService.register(req);
         return ResponseEntity.ok(Map.of("userId", id.toString()));
+    }
+
+    @PostMapping("/register/owner")
+    public ResponseEntity<RegistrationResponse> registerOwner(@Valid @RequestBody RegisterOwnerRequest request) {
+        RegistrationResponse response = authService.registerOwner(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/register/employee")
+    public ResponseEntity<RegistrationResponse> registerEmployee(@Valid @RequestBody RegisterEmployeeRequest request) {
+        RegistrationResponse response = authService.registerEmployee(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")

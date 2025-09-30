@@ -1,7 +1,6 @@
 package com.nempeth.korven.persistence.repository;
 
 import com.nempeth.korven.persistence.entity.Product;
-import com.nempeth.korven.persistence.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -10,9 +9,11 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    List<Product> findByOwner(User owner);
+    List<Product> findByBusinessId(UUID businessId);
 
-    Optional<Product> findByIdAndOwnerId(UUID id, UUID ownerId);
+    List<Product> findByBusinessIdAndCategoryId(UUID businessId, UUID categoryId);
 
-    boolean existsByOwnerIdAndNameIgnoreCase(UUID ownerId, String name);
+    Optional<Product> findByIdAndBusinessId(UUID id, UUID businessId);
+
+    boolean existsByBusinessIdAndNameIgnoreCase(UUID businessId, String name);
 }

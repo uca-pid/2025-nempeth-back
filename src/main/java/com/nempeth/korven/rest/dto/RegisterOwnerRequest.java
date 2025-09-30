@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record RegisterRequest(
+public record RegisterOwnerRequest(
         @NotBlank(message = "El email es obligatorio")
         @Email(message = "Formato de email inválido")
         String email,
@@ -17,5 +17,9 @@ public record RegisterRequest(
         
         @NotBlank(message = "La contraseña es obligatoria")
         @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-        String password
+        String password,
+        
+        @NotBlank(message = "El nombre del negocio es obligatorio")
+        @Size(max = 200, message = "El nombre del negocio no puede tener más de 200 caracteres")
+        String businessName
 ) {}

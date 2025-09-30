@@ -3,10 +3,10 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="
-      http://www.liquibase.org/xml/ns/dbchangelog
-      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
-    <changeSet id="001-enable-extensions" author="korven">
+    <changeSet id="000-ext-pgcrypto-citext" author="korven">
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
         </preConditions>
@@ -14,47 +14,228 @@
         <sql>CREATE EXTENSION IF NOT EXISTS citext;</sql>
     </changeSet>
 
-    <changeSet id="1.0-users" author="korven">
+    <changeSet id="001-users" author="korven">
         <createTable tableName="users">
-            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="email" type="CITEXT">
+            <column name="email" type="citext">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="name" type="TEXT"/>
-            <column name="last_name" type="TEXT"/>
-            <column name="password_hash" type="TEXT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="role" type="TEXT">
+            <column name="name" type="text"/>
+            <column name="last_name" type="text"/>
+            <column name="password_hash" type="text">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1.0-products" author="korven">
-        <createTable tableName="products">
-            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+    <changeSet id="002-password-reset-token" author="korven">
+        <createTable tableName="password_reset_token">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="owner_id" type="UUID">
+            <column name="user_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_prt_user"
+                             referencedTableName="users" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="token" type="varchar(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="timestamptz">
                 <constraints nullable="false"/>
             </column>
-            <column name="name" type="TEXT">
+            <column name="used_at" type="timestamptz"/>
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
-            <column name="description" type="TEXT"/>
-            <column name="price" type="NUMERIC(12,2)">
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-business" author="korven">
+        <createTable tableName="business">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="join_code" type="varchar(12)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="join_code_enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="004-business-membership" author="korven">
+        <createTable tableName="business_membership">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="business_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_membership_business"
+                             referencedTableName="business" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_membership_user"
+                             referencedTableName="users" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="role" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="text" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            </createTable>
+        <addUniqueConstraint tableName="business_membership"
+                             columnNames="business_id,user_id"
+                             constraintName="uq_membership_business_user"/>
+    </changeSet>
+
+    <changeSet id="005-category" author="korven">
+        <createTable tableName="category">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="business_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_category_business"
+                             referencedTableName="business" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_name" type="text"/>
+            <column name="icon" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="006-products" author="korven">
+        <createTable tableName="products">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="business_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_products_business"
+                             referencedTableName="business" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="category_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_products_category"
+                             referencedTableName="category" referencedColumnNames="id"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text"/>
+            <column name="price" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="007-sale" author="korven">
+        <createTable tableName="sale">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="business_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_sale_business"
+                             referencedTableName="business" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="created_by_user_id" type="uuid">
+                <constraints nullable="true" foreignKeyName="fk_sale_user"
+                             referencedTableName="users" referencedColumnNames="id"/>
+            </column>
+            <column name="occurred_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_amount" type="numeric(12,2)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
-        <addForeignKeyConstraint
-                baseTableName="products" baseColumnNames="owner_id"
-                referencedTableName="users" referencedColumnNames="id"
-                constraintName="fk_products_owner"
-                onDelete="CASCADE"/>
+        <createIndex tableName="sale" indexName="ix_sale_business_time">
+            <column name="business_id"/>
+            <column name="occurred_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="008-sale-item" author="korven">
+        <createTable tableName="sale_item">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sale_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_sale_item_sale"
+                             referencedTableName="sale" referencedColumnNames="id"
+                             deleteCascade="true"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_sale_item_product"
+                             referencedTableName="products" referencedColumnNames="id"/>
+            </column>
+            <column name="product_name_at_sale" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line_total" type="numeric(12,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Función para crear categorías estáticas automáticamente -->
+    <changeSet id="010-create-function-seed-static-categories" author="korven">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sql splitStatements="false">
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION seed_static_categories() RETURNS trigger AS '
+            BEGIN
+                INSERT INTO category (id, business_id, name, type, display_name, icon)
+                VALUES
+                    (gen_random_uuid(), NEW.id, ''Entrada'', ''STATIC'', ''Entrada'', ''🍽️''),
+                    (gen_random_uuid(), NEW.id, ''Plato principal'', ''STATIC'', ''Plato principal'', ''🍲''),
+                    (gen_random_uuid(), NEW.id, ''Postre'', ''STATIC'', ''Postre'', ''🍨''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas con alcohol'', ''STATIC'', ''Bebidas con alcohol'', ''🍺''),
+                    (gen_random_uuid(), NEW.id, ''Bebidas sin alcohol'', ''STATIC'', ''Bebidas sin alcohol'', ''🥤'');
+                RETURN NEW;
+            END;
+            ' LANGUAGE plpgsql;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <!-- Trigger para crear categorías estáticas cuando se crea un negocio -->
+    <changeSet id="011-create-trigger-seed-static-categories" author="korven">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sql>
+            DROP TRIGGER IF EXISTS trg_seed_static_categories ON business;
+        </sql>
+        <sql>
+            CREATE TRIGGER trg_seed_static_categories
+                AFTER INSERT ON business
+                FOR EACH ROW
+                EXECUTE FUNCTION seed_static_categories();
+        </sql>
     </changeSet>
 
 </databaseChangeLog>
