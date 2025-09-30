@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(name = "password_reset_token")
 @Getter
 @Setter
 @NoArgsConstructor
