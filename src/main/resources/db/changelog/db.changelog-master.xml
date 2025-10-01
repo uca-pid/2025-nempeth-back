@@ -7,4 +7,5 @@
       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
         <include file="db/changelog/db.changelog-1.0-initial.xml"/>
+        <include file="db/changelog/db.changelog-1.1-remove-fk-sale-item-product.xml"/>
 </databaseChangeLog>
