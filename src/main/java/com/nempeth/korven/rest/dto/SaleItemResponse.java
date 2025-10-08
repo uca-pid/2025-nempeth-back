@@ -11,6 +11,7 @@ public record SaleItemResponse(
         String productName,
         Integer quantity,
         BigDecimal unitPrice,
+        BigDecimal unitCost,
         BigDecimal lineTotal
 ) {
 }

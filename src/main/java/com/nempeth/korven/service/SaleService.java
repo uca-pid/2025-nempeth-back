@@ -55,6 +55,7 @@ public class SaleService {
                     .product(product)
                     .productNameAtSale(product.getName())
                     .unitPrice(product.getPrice())
+                    .unitCost(product.getCost())
                     .quantity(itemRequest.quantity())
                     .lineTotal(lineTotal)
                     .build();
@@ -123,6 +124,7 @@ public class SaleService {
                         .productName(item.getProductNameAtSale())
                         .quantity(item.getQuantity())
                         .unitPrice(item.getUnitPrice())
+                        .unitCost(item.getUnitCost())
                         .lineTotal(item.getLineTotal())
                         .build())
                 .toList();
