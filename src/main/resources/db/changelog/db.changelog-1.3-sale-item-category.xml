@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="013-sale-item-add-category-name" author="korven">
+        <addColumn tableName="sale_item">
+            <column name="category_name" type="text"/>
+        </addColumn>
+
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sql> 
+            UPDATE sale_item si
+            SET category_name = c.name
+            FROM products p
+            JOIN category c ON p.category_id = c.id
+            WHERE si.product_id = p.id
+            AND si.category_name IS NULL;
+        </sql>
+
+        <update tableName="sale_item">
+            <column name="category_name" value="UNKNOWN"/>
+            <where>category_name IS NULL</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>
