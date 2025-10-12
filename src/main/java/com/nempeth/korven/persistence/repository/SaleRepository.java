@@ -32,29 +32,27 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     List<Sale> findRecentSalesForBusiness(@Param("businessId") UUID businessId, @Param("startDate") OffsetDateTime startDate);
 
     @Query("""
-        SELECT YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.id, p.category.name, SUM(si.lineTotal)
-        FROM Sale s 
-        JOIN s.saleItems si 
-        JOIN si.product p 
+    SELECT YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName, SUM(si.lineTotal)
+    FROM Sale s 
+    JOIN s.saleItems si 
         WHERE s.business.id = :businessId 
         AND s.occurredAt BETWEEN :startDate AND :endDate
-        GROUP BY YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.id, p.category.name
-        ORDER BY YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.name
+    GROUP BY YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName
+    ORDER BY YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName
         """)
     List<Object[]> findMonthlyRevenueByCategory(@Param("businessId") UUID businessId, 
                                                @Param("startDate") OffsetDateTime startDate, 
                                                @Param("endDate") OffsetDateTime endDate);
     
     @Query("""
-        SELECT YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.id, p.category.name, 
-               SUM(si.lineTotal) - SUM(si.unitCost * si.quantity)
+        SELECT YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName, 
+        SUM(si.lineTotal) - SUM(si.unitCost * si.quantity)
         FROM Sale s 
         JOIN s.saleItems si 
-        JOIN si.product p 
         WHERE s.business.id = :businessId 
         AND s.occurredAt BETWEEN :startDate AND :endDate
-        GROUP BY YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.id, p.category.name
-        ORDER BY YEAR(s.occurredAt), MONTH(s.occurredAt), p.category.name
+        GROUP BY YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName
+        ORDER BY YEAR(s.occurredAt), MONTH(s.occurredAt), si.categoryName
         """)
     List<Object[]> findMonthlyProfitByCategory(@Param("businessId") UUID businessId, 
                                               @Param("startDate") OffsetDateTime startDate, 

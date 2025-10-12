@@ -7,14 +7,15 @@
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
     <changeSet id="013-sale-item-add-category-name" author="korven">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+
         <addColumn tableName="sale_item">
             <column name="category_name" type="text"/>
         </addColumn>
 
-        <preConditions onFail="MARK_RAN">
-            <dbms type="postgresql"/>
-        </preConditions>
-        <sql> 
+        <sql splitStatements="false">
             UPDATE sale_item si
             SET category_name = c.name
             FROM products p
@@ -27,6 +28,10 @@
             <column name="category_name" value="UNKNOWN"/>
             <where>category_name IS NULL</where>
         </update>
+
+        <addNotNullConstraint tableName="sale_item"
+                              columnName="category_name"
+                              columnDataType="text"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -8,6 +8,7 @@ import java.util.UUID;
 @Builder
 public record SaleItemResponse(
         UUID id,
+        String categoryName,
         String productName,
         Integer quantity,
         BigDecimal unitPrice,
