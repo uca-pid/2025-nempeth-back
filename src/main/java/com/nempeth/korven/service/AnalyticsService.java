@@ -40,9 +40,8 @@ public class AnalyticsService {
         return results.stream()
                 .map(result -> MonthlyCategoryRevenueResponse.builder()
                         .month(YearMonth.of((Integer) result[0], (Integer) result[1]))
-                        .categoryId((UUID) result[2])
-                        .categoryName((String) result[3])
-                        .revenue((BigDecimal) result[4])
+                        .categoryName((String) result[2])
+                        .revenue((BigDecimal) result[3])
                         .build())
                 .toList();
     }
@@ -62,9 +61,8 @@ public class AnalyticsService {
         return results.stream()
                 .map(result -> MonthlyCategoryProfitResponse.builder()
                         .month(YearMonth.of((Integer) result[0], (Integer) result[1]))
-                        .categoryId((UUID) result[2])
-                        .categoryName((String) result[3])
-                        .profit((BigDecimal) result[4])
+                        .categoryName((String) result[2])
+                        .profit((BigDecimal) result[3])
                         .build())
                 .toList();
     }

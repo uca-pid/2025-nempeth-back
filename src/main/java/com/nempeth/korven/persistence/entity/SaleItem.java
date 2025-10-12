@@ -31,6 +31,9 @@ public class SaleItem {
     @Column(name = "product_name_at_sale", nullable = false, columnDefinition = "text")
     private String productNameAtSale;
 
+    @Column(name = "category_name", nullable = false, columnDefinition = "text")
+    private String categoryName;
+
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
