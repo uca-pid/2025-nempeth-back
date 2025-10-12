@@ -55,6 +55,7 @@ public class ProductService {
                 .name(req.name())
                 .description(req.description())
                 .price(req.price())
+                .cost(req.cost())
                 .build();
         
         product = productRepository.save(product);
@@ -96,6 +97,7 @@ public class ProductService {
         product.setName(req.name());
         product.setDescription(req.description());
         product.setPrice(req.price());
+        product.setCost(req.cost());
         product.setCategory(category);
         
         productRepository.save(product);
@@ -137,6 +139,7 @@ public class ProductService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .cost(product.getCost())
                 .category(categoryResponse)
                 .build();
     }

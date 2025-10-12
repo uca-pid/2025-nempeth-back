@@ -20,6 +20,10 @@ public record ProductUpsertRequest(
         @Positive(message = "El precio debe ser mayor a 0")
         BigDecimal price,
         
+        @NotNull(message = "El costo es obligatorio")
+        @Positive(message = "El costo debe ser mayor a 0")
+        BigDecimal cost,
+        
         @NotNull(message = "La categoría es obligatoria")
         UUID categoryId
 ) {}

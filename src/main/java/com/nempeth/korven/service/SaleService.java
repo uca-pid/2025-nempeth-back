@@ -1,5 +1,6 @@
 package com.nempeth.korven.service;
 
+import com.nempeth.korven.constants.MembershipRole;
 import com.nempeth.korven.constants.MembershipStatus;
 import com.nempeth.korven.persistence.entity.*;
 import com.nempeth.korven.persistence.repository.*;
@@ -55,6 +56,7 @@ public class SaleService {
                     .product(product)
                     .productNameAtSale(product.getName())
                     .unitPrice(product.getPrice())
+                    .unitCost(product.getCost())
                     .quantity(itemRequest.quantity())
                     .lineTotal(lineTotal)
                     .build();
@@ -71,32 +73,50 @@ public class SaleService {
 
     @Transactional(readOnly = true)
     public List<SaleResponse> getSalesByBusiness(String userEmail, UUID businessId) {
-        validateUserBusinessAccess(userEmail, businessId);
+        BusinessMembership membership = validateUserBusinessAccessAndGetMembership(userEmail, businessId);
         
-        return saleRepository.findByBusinessIdOrderByOccurredAtDesc(businessId).stream()
-                .map(this::mapToResponse)
-                .toList();
+        if (membership.getRole() == MembershipRole.OWNER) {
+            return saleRepository.findByBusinessIdOrderByOccurredAtDesc(businessId).stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        } else {
+            return saleRepository.findByBusinessIdAndCreatedByUserIdOrderByOccurredAtDesc(businessId, membership.getUser().getId()).stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        }
     }
 
     @Transactional(readOnly = true)
     public List<SaleResponse> getSalesByBusinessAndDateRange(String userEmail, UUID businessId, 
                                                            OffsetDateTime startDate, OffsetDateTime endDate) {
-        validateUserBusinessAccess(userEmail, businessId);
+        BusinessMembership membership = validateUserBusinessAccessAndGetMembership(userEmail, businessId);
         
-        return saleRepository.findByBusinessIdAndOccurredAtBetweenOrderByOccurredAtDesc(businessId, startDate, endDate).stream()
-                .map(this::mapToResponse)
-                .toList();
+        if (membership.getRole() == MembershipRole.OWNER) {
+            return saleRepository.findByBusinessIdAndOccurredAtBetweenOrderByOccurredAtDesc(businessId, startDate, endDate).stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        } else {
+            return saleRepository.findByBusinessIdAndCreatedByUserIdAndOccurredAtBetweenOrderByOccurredAtDesc(businessId, membership.getUser().getId(), startDate, endDate).stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        }
     }
 
     @Transactional(readOnly = true)
     public SaleResponse getSaleById(String userEmail, UUID businessId, UUID saleId) {
-        validateUserBusinessAccess(userEmail, businessId);
+        BusinessMembership membership = validateUserBusinessAccessAndGetMembership(userEmail, businessId);
         
         Sale sale = saleRepository.findById(saleId)
                 .orElseThrow(() -> new IllegalArgumentException("Venta no encontrada"));
         
         if (!sale.getBusiness().getId().equals(businessId)) {
             throw new IllegalArgumentException("La venta no pertenece a este negocio");
+        }
+        
+        if (membership.getRole() == MembershipRole.EMPLOYEE) {
+            if (!sale.getCreatedByUser().getId().equals(membership.getUser().getId())) {
+                throw new IllegalArgumentException("No tienes permisos para ver esta venta");
+            }
         }
         
         return mapToResponse(sale);
@@ -116,6 +136,20 @@ public class SaleService {
         return user;
     }
 
+    private BusinessMembership validateUserBusinessAccessAndGetMembership(String userEmail, UUID businessId) {
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        
+        BusinessMembership membership = membershipRepository.findByBusinessIdAndUserId(businessId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("No tienes acceso a este negocio"));
+        
+        if (membership.getStatus() != MembershipStatus.ACTIVE) {
+            throw new IllegalArgumentException("Tu membresía en este negocio no está activa");
+        }
+        
+        return membership;
+    }
+
     private SaleResponse mapToResponse(Sale sale) {
         List<SaleItemResponse> items = saleItemRepository.findBySaleId(sale.getId()).stream()
                 .map(item -> SaleItemResponse.builder()
@@ -123,6 +157,7 @@ public class SaleService {
                         .productName(item.getProductNameAtSale())
                         .quantity(item.getQuantity())
                         .unitPrice(item.getUnitPrice())
+                        .unitCost(item.getUnitCost())
                         .lineTotal(item.getLineTotal())
                         .build())
                 .toList();

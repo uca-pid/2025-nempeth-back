@@ -8,4 +8,5 @@
 
         <include file="db/changelog/db.changelog-1.0-initial.xml"/>
         <include file="db/changelog/db.changelog-1.1-remove-fk-sale-item-product.xml"/>
+        <include file="db/changelog/db.changelog-1.2-cost.xml"/>
 </databaseChangeLog>

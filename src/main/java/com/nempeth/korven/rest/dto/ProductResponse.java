@@ -11,5 +11,6 @@ public record ProductResponse(
         String name,
         String description,
         BigDecimal price,
+        BigDecimal cost,
         CategoryResponse category
 ) {}

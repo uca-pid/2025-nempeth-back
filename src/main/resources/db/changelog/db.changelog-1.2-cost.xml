@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="009-products-add-cost" author="korven">
+        <addColumn tableName="products">
+            <column name="cost" type="numeric(12,2)" defaultValueNumeric="0.00"/>
+        </addColumn>
+
+        <addNotNullConstraint tableName="products"
+                              columnName="cost"
+                              columnDataType="numeric(12,2)"/>
+    </changeSet>
+
+    <changeSet id="012-sale-item-add-unit-cost" author="korven">
+        <addColumn tableName="sale_item">
+            <column name="unit_cost" type="numeric(12,2)"/>
+        </addColumn>
+        <sql>
+            UPDATE sale_item si
+            SET unit_cost = p.cost
+            FROM products p
+            WHERE si.product_id = p.id
+            AND si.unit_cost IS NULL;
+        </sql>
+
+        <update tableName="sale_item">
+            <column name="unit_cost" valueNumeric="0.00"/>
+            <where>unit_cost IS NULL</where>
+        </update>
+        <addNotNullConstraint tableName="sale_item"
+                              columnName="unit_cost"
+                              columnDataType="numeric(12,2)"/>
+    </changeSet>
+
+</databaseChangeLog>
